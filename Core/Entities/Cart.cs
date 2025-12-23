@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class Cart
+    public class Cart : BaseEntity
     {
-        public Guid Id { get; set; }
-        public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public decimal TotalAmount { get; set; }
 
         public Guid UserId { get; set; }
         public User User { get; set; }

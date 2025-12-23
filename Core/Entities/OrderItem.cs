@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class OrderItem
+    public class OrderItem : BaseEntity
     {
-        public Guid Id { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
 

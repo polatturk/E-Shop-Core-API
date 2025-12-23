@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,16 +7,14 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class Payment
+    public class Payment : BaseEntity
     {
-        public Guid Id { get; set; }
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
-        public string PaymentMethod { get; set; }
-        public string TransactionId { get; set; }
-        public string Status { get; set; }
-
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.CreditCard;
+        public PaymentStatus Status { get; set; }
         public Guid OrderId { get; set; } 
         public Order Order { get; set; }
     }
+    
 }

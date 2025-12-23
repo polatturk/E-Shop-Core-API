@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class CartItem
+    public class CartItem : BaseEntity
     {
-        public Guid Id { get; set; }
         public int Quantity { get; set; }
 
         public Guid CartId { get; set; }
