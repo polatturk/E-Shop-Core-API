@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Core.Entities;
 using System.Text;
 using Microsoft.AspNetCore.RateLimiting;
+using DataAccess.Repository.DataAccess.Repositories;
+using DataAccess.Repository;
 
 namespace EShopCoreAPI
 {
@@ -23,6 +25,9 @@ namespace EShopCoreAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // Generic Repository
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
 
