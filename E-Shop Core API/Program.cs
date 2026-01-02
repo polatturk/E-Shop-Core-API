@@ -6,6 +6,8 @@ using System.Text;
 using Microsoft.AspNetCore.RateLimiting;
 using DataAccess.Repository.DataAccess.Repositories;
 using DataAccess.Repository;
+using Business.Services;
+using Core.Interfaces;
 
 namespace EShopCoreAPI
 {
@@ -28,6 +30,17 @@ namespace EShopCoreAPI
 
             // Generic Repository
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            // Service Records
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IOrderItemService, OrderItemService>();
+            builder.Services.AddScoped<ICartService, CartService>();
+            builder.Services.AddScoped<ICartItemService, CartItemService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IAddressService, AddressService>();
 
             var app = builder.Build();
 
