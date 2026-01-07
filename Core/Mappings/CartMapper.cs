@@ -11,8 +11,10 @@ namespace Core.Mappings
 {
     [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
     [UseStaticMapper(typeof(CartItemMapper))] 
-    public partial class CartMapper
+    public static partial class CartMapper
     {
-        public partial CartResponseDto ToResponseDto(Cart cart);
+        public static partial CartResponseDto ToResponseDto(Cart cart);
+
+        public static partial List<CartResponseDto> ToResponseDtoList(List<Cart> carts);
     }
 }

@@ -1,54 +1,72 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
 using Core.Response;
-using DataAccess.Repository;
+using Core.DTOs;
+using Core.Mappings;
+using DataAccess.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Business.Services
+namespace Business.Services;
+
+public class OrderItemService(IUnitOfWork _unitOfWork) : IOrderItemService
 {
-    public class OrderItemService(IGenericRepository<OrderItem> _repository) : IOrderItemService
+    public async Task<Response<List<OrderItemResponseDto>>> GetAllAsync()
     {
-        public async Task<Response<List<OrderItem>>> GetAllAsync()
-        {
-            var data = await _repository.GetAll().ToListAsync();
-            return Response<List<OrderItem>>.Success(data, 200);
-        }
+        var items = await _unitOfWork.GetRepository<OrderItem>().GetAllAsync();
 
-        public async Task<Response<OrderItem>> GetByIdAsync(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            return data == null
-                ? Response<OrderItem>.Fail("Sipariş kalemi bulunamadı", 404)
-                : Response<OrderItem>.Success(data, 200);
-        }
+        var dtos = OrderItemMapper.ToResponseDtoList(items.ToList());
 
-        public async Task<Response<OrderItem>> CreateAsync(OrderItem entity)
-        {
-            await _repository.AddAsync(entity);
-            await _repository.SaveAsync();
-            return Response<OrderItem>.Success(entity, 201);
-        }
+        return Response<List<OrderItemResponseDto>>.Success(dtos, 200);
+    }
 
-        public async Task<Response<bool>> Update(OrderItem entity)
-        {
-            _repository.Update(entity);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+    public async Task<Response<OrderItemResponseDto>> GetByIdAsync(Guid id)
+    {
+        var item = await _unitOfWork.GetRepository<OrderItem>().GetByIdAsync(id);
 
-        public async Task<Response<bool>> Remove(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            if (data == null) return Response<bool>.Fail("Sipariş kalemi bulunamadı", 404);
+        if (item == null)
+            return Response<OrderItemResponseDto>.Fail("Sipariş kalemi bulunamadı", 404);
 
-            _repository.Remove(data);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        var dto = OrderItemMapper.ToResponseDto(item);
+        return Response<OrderItemResponseDto>.Success(dto, 200);
+    }
+
+    public async Task<Response<OrderItemResponseDto>> CreateAsync(OrderItemCreateDto dto)
+    {
+        var entity = OrderItemMapper.ToEntity(dto);
+
+        await _unitOfWork.GetRepository<OrderItem>().AddAsync(entity);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var responseDto = OrderItemMapper.ToResponseDto(entity);
+        return Response<OrderItemResponseDto>.Success(responseDto, 201);
+    }
+
+    public async Task<Response<bool>> UpdateAsync(OrderItemUpdateDto dto)
+    {
+        var existingItem = await _unitOfWork.GetRepository<OrderItem>().GetByIdAsync(dto.Id);
+
+        if (existingItem == null)
+            return Response<bool>.Fail("Sipariş kalemi bulunamadı", 404);
+
+        OrderItemMapper.UpdateEntityFromDto(dto, existingItem);
+
+        _unitOfWork.GetRepository<OrderItem>().Update(existingItem);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
+    }
+
+    public async Task<Response<bool>> RemoveAsync(Guid id)
+    {
+        var item = await _unitOfWork.GetRepository<OrderItem>().GetByIdAsync(id);
+
+        if (item == null)
+            return Response<bool>.Fail("Sipariş kalemi bulunamadı", 404);
+
+        _unitOfWork.GetRepository<OrderItem>().Delete(item);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
     }
 }

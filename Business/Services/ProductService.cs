@@ -1,53 +1,68 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
 using Core.Response;
-using DataAccess.Repository;
+using Core.DTOs;
+using Core.Mappings;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Business.Services
+namespace Business.Services;
+
+public class ProductService(IUnitOfWork _unitOfWork) : IProductService
 {
-    public class ProductService(IGenericRepository<Product> productRepository) : IProductService
+
+    public async Task<Response<List<ProductResponseDto>>> GetAllAsync()
     {
-        public async Task<Response<List<Product>>> GetAllAsync()
-        {
-            var products = await productRepository.GetAll().ToListAsync();
-            return Response<List<Product>>.Success(products, 200);
-        }
+        var products = await _unitOfWork.GetRepository<Product>()
+            .GetAllAsync(include: q => q.Include(p => p.Category));
 
-        public async Task<Response<Product>> GetByIdAsync(Guid id)
-        {
-            var product = await productRepository.GetByIdAsync(id);
-            return product == null
-                ? Response<Product>.Fail("Ürün bulunamadı", 404)
-                : Response<Product>.Success(product, 200);
-        }
+        var dtos = ProductMapper.ToResponseDtoList(products.ToList());
 
-        public async Task<Response<Product>> CreateAsync(Product product)
-        {
-            await productRepository.AddAsync(product);
-            await productRepository.SaveAsync();
-            return Response<Product>.Success(product, 201);
-        }
+        return Response<List<ProductResponseDto>>.Success(dtos, 200);
+    }
 
-        public async Task<Response<bool>> Update(Product product)
-        {
-            productRepository.Update(product);
-            await productRepository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+    public async Task<Response<ProductResponseDto>> GetByIdAsync(Guid id)
+    {
+        var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(id);
 
-        public async Task<Response<bool>> Remove(Guid id)
-        {
-            var product = await productRepository.GetByIdAsync(id);
-            if (product == null) return Response<bool>.Fail("Ürün bulunamadı", 404);
-            productRepository.Remove(product);
-            await productRepository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        if (product == null)
+            return Response<ProductResponseDto>.Fail("Ürün bulunamadı", 404);
+
+        var dto = ProductMapper.ToResponseDto(product);
+        return Response<ProductResponseDto>.Success(dto, 200);
+    }
+
+    public async Task<Response<ProductResponseDto>> CreateAsync(ProductCreateDto dto)
+    {
+        var entity = ProductMapper.ToEntity(dto);
+
+        await _unitOfWork.GetRepository<Product>().AddAsync(entity);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var responseDto = ProductMapper.ToResponseDto(entity);
+        return Response<ProductResponseDto>.Success(responseDto, 201);
+    }
+
+    public async Task<Response<bool>> UpdateAsync(ProductUpdateDto dto) 
+    {
+        var existingProduct = await _unitOfWork.GetRepository<Product>().GetByIdAsync(dto.Id);
+        if (existingProduct == null) return Response<bool>.Fail("Ürün bulunamadı", 404);
+
+        ProductMapper.UpdateEntityFromDto(dto, existingProduct);
+        _unitOfWork.GetRepository<Product>().Update(existingProduct);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
+    }
+
+    public async Task<Response<bool>> RemoveAsync(Guid id) 
+    {
+        var product = await _unitOfWork.GetRepository<Product>().GetByIdAsync(id);
+        if (product == null) return Response<bool>.Fail("Ürün bulunamadı", 404);
+
+        _unitOfWork.GetRepository<Product>().Delete(product);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
     }
 }

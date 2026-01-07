@@ -1,28 +1,22 @@
 ﻿using Core.DTOs;
 using Core.Entities;
 using Riok.Mapperly.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core.Mappings
 {
+
     [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-    public partial class UserMapper
+    public static partial class UserMapper 
     {
-        // RegisterDto -> User Entity
         public static partial User ToEntity(UserRegisterDto dto);
 
-        // UpdateDto -> User Entity
-        public static partial User ToEntity(UserUpdateDto dto);
+        public static partial void UpdateEntityFromDto(UserUpdateDto dto, User entity);
 
-        //  User Entity -> ResponseDto
-        [MapProperty(nameof(User), nameof(UserResponseDto.FullName))]
+        [MapProperty(nameof(User.FirstName), nameof(UserResponseDto.FullName))] 
         public static partial UserResponseDto ToResponseDto(User user);
 
-        // FirstName ve LastName'i birleştiriyoruz
+        public static partial List<UserResponseDto> ToResponseDtoList(List<User> users);
+
         private static string MapFullName(User user)
         {
             return $"{user.FirstName} {user.LastName}";

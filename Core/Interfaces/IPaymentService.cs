@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,14 @@ namespace Core.Interfaces
 {
     public interface IPaymentService
     {
-        Task<Response<List<Payment>>> GetAllAsync();
-        Task<Response<Payment>> GetByIdAsync(Guid id);
-        Task<Response<Payment>> CreateAsync(Payment payment); // Ödemeyi kaydet
-        Task<Response<bool>> Update(Payment payment);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<PaymentResponseDto>>> GetAllAsync();
+
+        Task<Response<PaymentResponseDto>> GetByIdAsync(Guid id);
+
+        Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto);
+
+        Task<Response<bool>> UpdateStatusAsync(PaymentStatusUpdateDto dto);
+
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

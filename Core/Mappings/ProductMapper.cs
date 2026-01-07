@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 namespace Core.Mappings
 {
     [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-    public partial class ProductMapper
+    public static partial class ProductMapper
     {
-        public partial Product ToEntity(ProductCreateDto dto);
+        public static partial Product ToEntity(ProductCreateDto dto);
 
-        public partial Product ToEntity(ProductUpdateDto dto);
+        [MapProperty("Category.Name", nameof(ProductResponseDto.CategoryName))]
+        public static partial ProductResponseDto ToResponseDto(Product product);
 
-        [MapProperty(nameof(Product.Category.Name), nameof(ProductResponseDto.CategoryName))]
-        public partial ProductResponseDto ToResponseDto(Product product);
+        public static partial List<ProductResponseDto> ToResponseDtoList(List<Product> products);
 
-        public partial List<ProductResponseDto> ToResponseDtoList(List<Product> products);
+        public static partial void UpdateEntityFromDto(ProductUpdateDto dto, Product entity);
     }
 }

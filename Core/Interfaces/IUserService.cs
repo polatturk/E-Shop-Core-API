@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,14 @@ namespace Core.Interfaces
 {
     public interface IUserService
     {
-        Task<Response<List<User>>> GetAllAsync();
-        Task<Response<User>> GetByIdAsync(Guid id);
-        Task<Response<User>> CreateAsync(User user);
-        Task<Response<bool>> Update(User user);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<UserResponseDto>>> GetAllAsync();
+
+        Task<Response<UserResponseDto>> GetByIdAsync(Guid id);
+
+        Task<Response<UserResponseDto>> CreateAsync(UserRegisterDto dto);
+
+        Task<Response<bool>> UpdateAsync(UserUpdateDto dto);
+
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

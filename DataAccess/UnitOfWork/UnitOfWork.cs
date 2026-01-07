@@ -1,5 +1,4 @@
 ﻿using Core.Interfaces;
-using DataAccess.Repository.DataAccess.Repositories;
 using DataAccess.Repository;
 using System;
 using System.Collections.Generic;

@@ -11,12 +11,15 @@ namespace Core.Mappings
 {
     [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
     [UseStaticMapper(typeof(OrderItemMapper))]
-    public partial class OrderMapper
+    public static partial class OrderMapper
     {
-        public partial Order ToEntity(OrderCreateDto dto);
+        public static partial Order ToEntity(OrderCreateDto dto);
 
-        public partial OrderResponseDto ToResponseDto(Order order);
+        public static partial OrderResponseDto ToResponseDto(Order order);
 
-        public partial List<OrderResponseDto> ToResponseDtoList(List<Order> orders);
+        public static partial List<OrderResponseDto> ToResponseDtoList(List<Order> orders);
+
+        public static partial void UpdateEntityFromDto(OrderUpdateDto dto, Order entity);
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,14 @@ namespace Core.Interfaces
 {
     public interface IAddressService
     {
-        Task<Response<List<Address>>> GetAllAsync();
-        Task<Response<Address>> GetByIdAsync(Guid id);
-        Task<Response<Address>> CreateAsync(Address address);
-        Task<Response<bool>> Update(Address address);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<AddressResponseDto>>> GetAllAsync();
+
+        Task<Response<AddressResponseDto>> GetByIdAsync(Guid id);
+
+        Task<Response<AddressResponseDto>> CreateAsync(AddressCreateDto dto);
+
+        Task<Response<bool>> UpdateAsync(AddressUpdateDto dto);
+
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

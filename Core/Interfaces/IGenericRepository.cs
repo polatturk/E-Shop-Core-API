@@ -1,26 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 
-namespace DataAccess.Repository
+namespace Core.Interfaces;
+
+public interface IGenericRepository<T> where T : class
 {
-    public interface IGenericRepository<T> where T : class
-    {
-        IQueryable<T> GetAll(); 
-        IQueryable<T> GetWhere(Expression<Func<T, bool>> method); 
-        Task<T> GetByIdAsync(Guid id); 
-        Task<T> GetSingleAsync(Expression<Func<T, bool>> method);
+    Task<T> GetByIdAsync(Guid id);
 
-        Task<bool> AddAsync(T entity);
-        Task<bool> AddRangeAsync(List<T> entities);
+    Task<IEnumerable<T>> GetAllAsync(
+        Expression<Func<T, bool>>? filter = null,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
 
-        bool Update(T entity);
-        bool Remove(T entity);
-        void RemoveRange(List<T> entities);
-
-        Task<int> SaveAsync();
-    }
+    Task AddAsync(T entity); 
+    void Update(T entity);
+    void Delete(T entity);
 }

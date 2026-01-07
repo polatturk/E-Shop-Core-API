@@ -9,4 +9,5 @@ namespace Core.DTOs
 {
     public record OrderCreateDto(Guid UserId, Guid ShippingAddressId, Guid BillingAddressId, List<OrderItemCreateDto> OrderItems);
     public record OrderResponseDto(Guid Id, DateTime OrderDate, decimal TotalAmount, OrderStatus Status, List<OrderItemResponseDto> OrderItems);
+    public record OrderUpdateDto(Guid Id, OrderStatus Status);
 }

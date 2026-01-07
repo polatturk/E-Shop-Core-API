@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,14 @@ namespace Core.Interfaces
 {
     public interface ICategoryService
     {
-        Task<Response<List<Category>>> GetAllAsync();
-        Task<Response<Category>> GetByIdAsync(Guid id);
-        Task<Response<Category>> CreateAsync(Category category);
-        Task<Response<bool>> Update(Category category);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<CategoryResponseDto>>> GetAllAsync();
+
+        Task<Response<CategoryResponseDto>> GetByIdAsync(Guid id);
+
+        Task<Response<CategoryResponseDto>> CreateAsync(CategoryCreateDto dto);
+
+        Task<Response<bool>> UpdateAsync(CategoryUpdateDto dto);
+
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

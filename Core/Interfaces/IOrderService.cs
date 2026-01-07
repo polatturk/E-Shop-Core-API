@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,14 @@ namespace Core.Interfaces
 {
     public interface IOrderService
     {
-        Task<Response<List<Order>>> GetAllAsync();
-        Task<Response<Order>> GetByIdAsync(Guid id);
-        Task<Response<Order>> CreateAsync(Order order);
-        Task<Response<bool>> Update(Order order);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<OrderResponseDto>>> GetAllAsync();
+
+        Task<Response<OrderResponseDto>> GetByIdAsync(Guid id);
+
+        Task<Response<OrderResponseDto>> CreateAsync(OrderCreateDto dto);
+
+        Task<Response<bool>> UpdateAsync(OrderUpdateDto dto);
+
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

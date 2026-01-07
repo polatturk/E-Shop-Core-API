@@ -1,52 +1,71 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
-using DataAccess.Repository;
 using Core.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Core.DTOs;
+using Core.Mappings;
+using DataAccess.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+    
+namespace Business.Services;
 
-namespace Business.Services
+public class PaymentService(IUnitOfWork _unitOfWork) : IPaymentService
 {
-    public class PaymentService(IGenericRepository<Payment> _repository) : IPaymentService
+    public async Task<Response<List<PaymentResponseDto>>> GetAllAsync()
     {
-        public async Task<Response<List<Payment>>?> GetAllAsync()
-        {
-            var data = await _repository.GetAll().ToListAsync();
-            return Response<List<Payment>>.Success(data, 200);
-        }
+        var payments = await _unitOfWork.GetRepository<Payment>().GetAllAsync();
 
-        public async Task<Response<Payment>> GetByIdAsync(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            return data == null ? Response<Payment>.Fail("Ödeme kaydı bulunamadı", 404) : Response<Payment>.Success(data, 200);
-        }
+        var dtos = PaymentMapper.ToResponseDtoList(payments.ToList());
+        return Response<List<PaymentResponseDto>>.Success(dtos, 200);
+    }
 
-        public async Task<Response<Payment>> CreateAsync(Payment entity)
-        {
-            // İleride buraya banka entegrasyonu kodları gelecek
-            await _repository.AddAsync(entity);
-            await _repository.SaveAsync();
-            return Response<Payment>.Success(entity, 201);
-        }
+    public async Task<Response<PaymentResponseDto>> GetByIdAsync(Guid id)
+    {
+        var payment = await _unitOfWork.GetRepository<Payment>().GetByIdAsync(id);
 
-        public async Task<Response<bool>> Update(Payment entity)
-        {
-            _repository.Update(entity);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        if (payment == null)
+            return Response<PaymentResponseDto>.Fail("Ödeme kaydı bulunamadı", 404);
 
-        public async Task<Response<bool>> Remove(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            if (data == null) return Response<bool>.Fail("Ödeme kaydı bulunamadı", 404);
-            _repository.Remove(data);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        var dto = PaymentMapper.ToResponseDto(payment);
+        return Response<PaymentResponseDto>.Success(dto, 200);
+    }
+
+    public async Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto)
+    {
+        var entity = PaymentMapper.ToEntity(dto);
+
+        await _unitOfWork.GetRepository<Payment>().AddAsync(entity);
+
+        await _unitOfWork.SaveChangesAsync();
+
+        var responseDto = PaymentMapper.ToResponseDto(entity);
+        return Response<PaymentResponseDto>.Success(responseDto, 201);
+    }
+
+    public async Task<Response<bool>> UpdateStatusAsync(PaymentStatusUpdateDto dto)
+    {
+        var existingPayment = await _unitOfWork.GetRepository<Payment>().GetByIdAsync(dto.Id);
+
+        if (existingPayment == null)
+            return Response<bool>.Fail("Ödeme kaydı bulunamadı", 404);
+
+        PaymentMapper.UpdateStatusFromDto(dto, existingPayment);
+
+        _unitOfWork.GetRepository<Payment>().Update(existingPayment);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
+    }
+
+    public async Task<Response<bool>> RemoveAsync(Guid id)
+    {
+        var payment = await _unitOfWork.GetRepository<Payment>().GetByIdAsync(id);
+
+        if (payment == null)
+            return Response<bool>.Fail("Ödeme kaydı bulunamadı", 404);
+
+        _unitOfWork.GetRepository<Payment>().Delete(payment);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
     }
 }

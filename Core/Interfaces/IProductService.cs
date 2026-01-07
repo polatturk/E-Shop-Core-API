@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,10 @@ namespace Core.Interfaces
 {
     public interface IProductService
     {
-        Task<Response<List<Product>>> GetAllAsync();
-        Task<Response<Product>> GetByIdAsync(Guid id);
-        Task<Response<Product>> CreateAsync(Product product);
-        Task<Response<bool>> Update(Product product);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<ProductResponseDto>>> GetAllAsync();
+        Task<Response<ProductResponseDto>> GetByIdAsync(Guid id);
+        Task<Response<ProductResponseDto>> CreateAsync(ProductCreateDto dto);
+        Task<Response<bool>> UpdateAsync(ProductUpdateDto dto);
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

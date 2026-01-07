@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Core.Mappings
 {
     [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None)]
-    public partial class CartItemMapper
+    public static partial class CartItemMapper
     {
         [MapProperty("Product.Name", nameof(CartItemResponseDto.ProductName))]
 
@@ -21,6 +21,9 @@ namespace Core.Mappings
         [MapProperty(nameof(CartItem.Quantity), nameof(CartItemResponseDto.TotalPrice))]
 
         public static partial CartItemResponseDto ToResponseDto(CartItem item);
+        public static partial CartItem ToEntity(AddToCartDto dto);
+        public static partial List<CartItemResponseDto> ToResponseDtoList(List<CartItem> items);
+        public static partial void UpdateEntityFromDto(CartItemUpdateDto dto, CartItem entity);
 
         private static decimal MapTotalPrice(CartItem item)
         {

@@ -1,4 +1,5 @@
-﻿using Core.Entities;
+﻿using Core.DTOs;
+using Core.Entities;
 using Core.Response;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,10 @@ namespace Core.Interfaces
 {
     public interface ICartItemService
     {
-        Task<Response<List<CartItem>>> GetAllAsync();
-        Task<Response<CartItem>> GetByIdAsync(Guid id);
-        Task<Response<CartItem>> CreateAsync(CartItem cartItem);
-        Task<Response<bool>> Update(CartItem cartItem);
-        Task<Response<bool>> Remove(Guid id);
+        Task<Response<List<CartItemResponseDto>>> GetAllAsync();
+        Task<Response<CartItemResponseDto>> GetByIdAsync(Guid id);
+        Task<Response<CartItemResponseDto>> CreateAsync(AddToCartDto dto);
+        Task<Response<bool>> UpdateAsync(CartItemUpdateDto dto);
+        Task<Response<bool>> RemoveAsync(Guid id);
     }
 }

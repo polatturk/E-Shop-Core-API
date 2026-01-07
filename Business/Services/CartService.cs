@@ -1,51 +1,45 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
 using Core.Response;
-using DataAccess.Repository;
+using Core.DTOs;
+using Core.Mappings;
+using DataAccess.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Business.Services
+namespace Business.Services;
+
+public class CartService(IUnitOfWork _unitOfWork) : ICartService
 {
-    public class CartService(IGenericRepository<Cart> _repository) : ICartService
+    public async Task<Response<List<CartResponseDto>>> GetAllAsync()
     {
-        public async Task<Response<List<Cart>>> GetAllAsync()
-        {
-            var data = await _repository.GetAll().ToListAsync();
-            return Response<List<Cart>>.Success(data, 200);
-        }
+        var carts = await _unitOfWork.GetRepository<Cart>()
+            .GetAllAsync(include: q => q.Include(c => c.Items));
 
-        public async Task<Response<Cart>> GetByIdAsync(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            return data == null ? Response<Cart>.Fail("Sepet bulunamadı", 404) : Response<Cart>.Success(data, 200);
-        }
+        var dtos = CartMapper.ToResponseDtoList(carts.ToList());
+        return Response<List<CartResponseDto>>.Success(dtos, 200);
+    }   
 
-        public async Task<Response<Cart>> CreateAsync(Cart entity)
-        {
-            await _repository.AddAsync(entity);
-            await _repository.SaveAsync();
-            return Response<Cart>.Success(entity, 201);
-        }
+    public async Task<Response<CartResponseDto>> GetByIdAsync(Guid id)
+    {
+        var cart = await _unitOfWork.GetRepository<Cart>().GetByIdAsync(id);
 
-        public async Task<Response<bool>> Update(Cart entity)
-        {
-            _repository.Update(entity);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        if (cart == null)
+            return Response<CartResponseDto>.Fail("Sepet bulunamadı", 404);
 
-        public async Task<Response<bool>> Remove(Guid id)
-        {
-            var data = await _repository.GetByIdAsync(id);
-            if (data == null) return Response<bool>.Fail("Sepet bulunamadı", 404);
-            _repository.Remove(data);
-            await _repository.SaveAsync();
-            return Response<bool>.Success(204);
-        }
+        var dto = CartMapper.ToResponseDto(cart);
+        return Response<CartResponseDto>.Success(dto, 200);
+    }
+
+    public async Task<Response<bool>> RemoveAsync(Guid id)
+    {
+        var cart = await _unitOfWork.GetRepository<Cart>().GetByIdAsync(id);
+
+        if (cart == null)
+            return Response<bool>.Fail("Sepet bulunamadı", 404);
+
+        _unitOfWork.GetRepository<Cart>().Delete(cart);
+        await _unitOfWork.SaveChangesAsync();
+
+        return Response<bool>.Success(true, 204);
     }
 }
