@@ -1,5 +1,4 @@
-﻿using Business.Services;
-using Core.DTOs;
+﻿using Core.DTOs;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,35 +8,42 @@ namespace EShopCoreAPI.Controllers
     [ApiController]
     public class UserController(IUserService _userService) : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             var response = await _userService.GetAllAsync();
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var response = await _userService.GetByIdAsync(id);
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(UserRegisterDto dto)
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register(UserRegisterDto dto)
         {
-            var response = await _userService.CreateAsync(dto);
+            var response = await _userService.RegisterAsync(dto);
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpPut]
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login(UserLoginDto dto)
+        {
+            var response = await _userService.LoginAsync(dto);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [HttpPut("Update")]
         public async Task<IActionResult> Update(UserUpdateDto dto)
         {
             var response = await _userService.UpdateAsync(dto);
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var response = await _userService.RemoveAsync(id);

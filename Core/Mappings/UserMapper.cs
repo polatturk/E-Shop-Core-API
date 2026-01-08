@@ -9,6 +9,7 @@ namespace Core.Mappings
     public static partial class UserMapper 
     {
         public static partial User ToEntity(UserRegisterDto dto);
+        public static partial User ToEntity(UserLoginDto dto);
 
         public static partial void UpdateEntityFromDto(UserUpdateDto dto, User entity);
 

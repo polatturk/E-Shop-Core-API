@@ -12,6 +12,7 @@ namespace Core.DTOs
     public record UserLoginDto(string Email, string Password);
 
     public record UserResponseDto(Guid Id, string FullName, string Email, UserRole Role, Gender Gender);
+    public record TokenResponseDto(string AccessToken, DateTime AccessTokenExpiration);
 
     public record UserUpdateDto(Guid Id, string FirstName, string LastName, string Email, Gender Gender);
 }

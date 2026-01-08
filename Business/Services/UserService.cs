@@ -19,6 +19,7 @@ public class UserService(IUnitOfWork _unitOfWork) : IUserService
 
         return Response<List<UserResponseDto>>.Success(dtos, 200);
     }
+
     public async Task<Response<UserResponseDto>> GetByIdAsync(Guid id)
     {
         var user = await _unitOfWork.GetRepository<User>().GetByIdAsync(id);
@@ -31,17 +32,43 @@ public class UserService(IUnitOfWork _unitOfWork) : IUserService
         return Response<UserResponseDto>.Success(dto, 200);
     }
 
-    public async Task<Response<UserResponseDto>> CreateAsync(UserRegisterDto dto) 
+    public async Task<Response<UserResponseDto>> RegisterAsync(UserRegisterDto dto)
     {
-        var entity = UserMapper.ToEntity(dto);
+        var existingUsers = await _unitOfWork.GetRepository<User>().GetAllAsync(x => x.Email == dto.Email);
+        if (existingUsers.Any())
+        {
+            return Response<UserResponseDto>.Fail("Bu email adresi zaten kullanımda.", 400);
+        }
+
+        var entity = UserMapper.ToEntity(dto); 
 
         await _unitOfWork.GetRepository<User>().AddAsync(entity);
-
         await _unitOfWork.SaveChangesAsync();
 
         var responseDto = UserMapper.ToResponseDto(entity);
-
         return Response<UserResponseDto>.Success(responseDto, 201);
+    }
+
+    public async Task<Response<TokenResponseDto>> LoginAsync(UserLoginDto dto)
+    {
+        var userList = await _unitOfWork.GetRepository<User>().GetAllAsync(x => x.Email == dto.Email);
+        var user = userList.FirstOrDefault();
+
+        if (user == null)
+        {
+            return Response<TokenResponseDto>.Fail("Email veya şifre hatalı.", 404);
+        }
+
+        // İleride BCrypt ile hashleyeceğim)
+        if (user.Password != dto.Password)
+        {
+            return Response<TokenResponseDto>.Fail("Email veya şifre hatalı.", 400);
+        }
+
+        // JWT yazılacak
+        var token = new TokenResponseDto("fake-jwt-token-buraya", DateTime.Now.AddHours(1));
+
+        return Response<TokenResponseDto>.Success(token, 200);
     }
 
     public async Task<Response<bool>> UpdateAsync(UserUpdateDto dto)

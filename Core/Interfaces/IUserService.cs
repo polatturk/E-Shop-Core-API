@@ -15,7 +15,8 @@ namespace Core.Interfaces
 
         Task<Response<UserResponseDto>> GetByIdAsync(Guid id);
 
-        Task<Response<UserResponseDto>> CreateAsync(UserRegisterDto dto);
+        Task<Response<UserResponseDto>> RegisterAsync(UserRegisterDto dto);
+        Task<Response<TokenResponseDto>> LoginAsync(UserLoginDto dto);
 
         Task<Response<bool>> UpdateAsync(UserUpdateDto dto);
 
