@@ -10,6 +10,11 @@ public class GenericRepository<TEntity>(ApiContext _context) : IGenericRepositor
 {
     private readonly DbSet<TEntity> _dbset = _context.Set<TEntity>();
 
+    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter)
+    {
+        return await _dbset.AnyAsync(filter);
+    }
+
     public async Task<IEnumerable<TEntity>> GetAllAsync(
         Expression<Func<TEntity, bool>>? filter = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)

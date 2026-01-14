@@ -7,6 +7,8 @@ public interface IGenericRepository<T> where T : class
 {
     Task<T> GetByIdAsync(Guid id);
 
+    Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+
     Task<IEnumerable<T>> GetAllAsync(
         Expression<Func<T, bool>>? filter = null,
         Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);

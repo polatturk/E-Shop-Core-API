@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services;
 
-public class UserService(IUnitOfWork _unitOfWork) : IUserService
+public class UserService(IUnitOfWork _unitOfWork, ITokenService _tokenService) : IUserService
 {
 
     public async Task<Response<List<UserResponseDto>>> GetAllAsync()
@@ -34,19 +34,32 @@ public class UserService(IUnitOfWork _unitOfWork) : IUserService
 
     public async Task<Response<UserResponseDto>> RegisterAsync(UserRegisterDto dto)
     {
-        var existingUsers = await _unitOfWork.GetRepository<User>().GetAllAsync(x => x.Email == dto.Email);
-        if (existingUsers.Any())
+        var isEmailTaken = await _unitOfWork.GetRepository<User>().AnyAsync(x => x.Email == dto.Email);
+
+        if (isEmailTaken)
         {
             return Response<UserResponseDto>.Fail("Bu email adresi zaten kullanımda.", 400);
         }
 
-        var entity = UserMapper.ToEntity(dto); 
+        try
+        {
+            var entity = UserMapper.ToEntity(dto);
 
-        await _unitOfWork.GetRepository<User>().AddAsync(entity);
-        await _unitOfWork.SaveChangesAsync();
+            entity.Password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-        var responseDto = UserMapper.ToResponseDto(entity);
-        return Response<UserResponseDto>.Success(responseDto, 201);
+            entity.Role = Core.Enums.UserRole.Customer;
+
+            await _unitOfWork.GetRepository<User>().AddAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            var responseDto = UserMapper.ToResponseDto(entity);
+            return Response<UserResponseDto>.Success(responseDto, 201);
+        }
+        catch (Exception ex)
+        {
+            // Loglama buraya gelecek (NLog/Serilog vb.)
+            return Response<UserResponseDto>.Fail($"Kayıt işlemi başarısız: {ex.Message}", 500);
+        }
     }
 
     public async Task<Response<TokenResponseDto>> LoginAsync(UserLoginDto dto)
@@ -59,16 +72,16 @@ public class UserService(IUnitOfWork _unitOfWork) : IUserService
             return Response<TokenResponseDto>.Fail("Email veya şifre hatalı.", 404);
         }
 
-        // İleride BCrypt ile hashleyeceğim)
-        if (user.Password != dto.Password)
+        bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
+
+        if (!isPasswordValid)
         {
             return Response<TokenResponseDto>.Fail("Email veya şifre hatalı.", 400);
         }
 
-        // JWT yazılacak
-        var token = new TokenResponseDto("fake-jwt-token-buraya", DateTime.Now.AddHours(1));
+        var tokenResponse = _tokenService.CreateToken(user);
 
-        return Response<TokenResponseDto>.Success(token, 200);
+        return Response<TokenResponseDto>.Success(tokenResponse, 200);
     }
 
     public async Task<Response<bool>> UpdateAsync(UserUpdateDto dto)
