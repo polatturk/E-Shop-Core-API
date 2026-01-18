@@ -15,7 +15,7 @@ namespace Core.Interfaces
 
         Task<Response<OrderResponseDto>> GetByIdAsync(Guid id);
 
-        Task<Response<OrderResponseDto>> CreateAsync(OrderCreateDto dto);
+        Task<Response<OrderResponseDto>> CreateAsync(OrderCreateDto dto, Guid userId);
 
         Task<Response<bool>> UpdateAsync(OrderUpdateDto dto);
 

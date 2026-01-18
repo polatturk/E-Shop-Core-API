@@ -13,7 +13,8 @@ public class OrderService(IUnitOfWork _unitOfWork) : IOrderService
     public async Task<Response<List<OrderResponseDto>>> GetAllAsync()
     {
         var orders = await _unitOfWork.GetRepository<Order>()
-            .GetAllAsync(include: q => q.Include(o => o.OrderItems));
+            .GetAllAsync(include: q => q.Include(o => o.OrderItems)
+                                        .ThenInclude(oi => oi.Product));
 
         var dtos = OrderMapper.ToResponseDtoList(orders.ToList());
         return Response<List<OrderResponseDto>>.Success(dtos, 200);
@@ -30,12 +31,14 @@ public class OrderService(IUnitOfWork _unitOfWork) : IOrderService
         return Response<OrderResponseDto>.Success(dto, 200);
     }
 
-    public async Task<Response<OrderResponseDto>> CreateAsync(OrderCreateDto dto)
+    public async Task<Response<OrderResponseDto>> CreateAsync(OrderCreateDto dto, Guid userId)
     {
         var entity = OrderMapper.ToEntity(dto);
 
-        await _unitOfWork.GetRepository<Order>().AddAsync(entity);
+        entity.UserId = userId;
 
+
+        await _unitOfWork.GetRepository<Order>().AddAsync(entity);
         await _unitOfWork.SaveChangesAsync();
 
         var responseDto = OrderMapper.ToResponseDto(entity);
