@@ -15,7 +15,7 @@ namespace Core.Interfaces
 
         Task<Response<PaymentResponseDto>> GetByIdAsync(Guid id);
 
-        Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto);
+        Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto, Guid userId);
 
         Task<Response<bool>> UpdateStatusAsync(PaymentStatusUpdateDto dto);
 

@@ -9,7 +9,7 @@ namespace Core.Enums
     public enum PaymentStatus
     {
         Pending = 1,   // Ödeme bekleniyor
-        Completed = 2, // Ödeme başarıyla tamamlandı
+        Success = 2, // Ödeme başarıyla tamamlandı
         Failed = 3,    // Ödeme başarısız/Hatalı
         Refunded = 4   // İade edildi
     }

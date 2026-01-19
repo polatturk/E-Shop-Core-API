@@ -11,7 +11,7 @@ namespace Core.Enums
         Pending = 1,    // Beklemede
         Processing = 2, // Hazırlanıyor
         Shipped = 3,    // Kargolandı
-        Delivered = 4,  // Teslim Edildi
+        Completed = 4,  // Teslim Edildi
         Cancelled = 5   // İptal Edildi
     }
 }

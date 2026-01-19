@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using Core.Response;
 using Core.DTOs;
@@ -29,11 +30,31 @@ public class PaymentService(IUnitOfWork _unitOfWork) : IPaymentService
         return Response<PaymentResponseDto>.Success(dto, 200);
     }
 
-    public async Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto)
+    public async Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto, Guid userId)
     {
+        // 1. Ödeme yapılmak istenen siparişi bulma
+        var order = await _unitOfWork.GetRepository<Order>()
+            .GetByIdAsync(dto.OrderId);
+
+        // 2. Güvenlik ve Mantık Kontrolleri
+        if (order == null)
+            return Response<PaymentResponseDto>.Fail("Ödeme yapılacak sipariş bulunamadı.", 404);
+
+        if (order.UserId != userId)
+            return Response<PaymentResponseDto>.Fail("Size ait olmayan bir sipariş için ödeme yapamazsınız!", 403);
+
+        if (order.Status == OrderStatus.Shipped || order.Status == OrderStatus.Completed)
+            return Response<PaymentResponseDto>.Fail("Bu sipariş zaten kargolanmış veya teslim edilmiş.", 400);
+
         var entity = PaymentMapper.ToEntity(dto);
+        entity.PaymentDate = DateTime.Now;
+
+        entity.Status = PaymentStatus.Success;
+
+        order.Status = OrderStatus.Processing;
 
         await _unitOfWork.GetRepository<Payment>().AddAsync(entity);
+        _unitOfWork.GetRepository<Order>().Update(order);
 
         await _unitOfWork.SaveChangesAsync();
 
