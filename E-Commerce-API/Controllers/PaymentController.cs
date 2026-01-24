@@ -1,56 +1,54 @@
-﻿using Business.Services;
-using Core.DTOs;
+﻿using Core.DTOs;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 
-namespace E_Shop_Core_API.Controllers
+namespace E_Commerce_API.Controllers
 {
+    [Authorize] // Tüm ödeme işlemleri yetki gerektirsin
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderController(IOrderService _orderService) : ControllerBase
+    public class PaymentController(IPaymentService _paymentService) : ControllerBase
     {
         [HttpGet("GetAll")]
+        [Authorize(Roles = "Admin")] // Sadece admin tüm ödemeleri görebilsin
         public async Task<IActionResult> GetAll()
         {
-            var response = await _orderService.GetAllAsync();
+            var response = await _paymentService.GetAllAsync();
             return StatusCode(response.StatusCode, response);
         }
 
         [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var response = await _orderService.GetByIdAsync(id);
+            var response = await _paymentService.GetByIdAsync(id);
             return StatusCode(response.StatusCode, response);
         }
 
-        [Authorize] 
+        [Authorize]
         [HttpPost("Create")]
-        public async Task<IActionResult> Create(OrderCreateDto dto)
+        public async Task<IActionResult> Create(PaymentCreateDto dto)
         {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim))
-            {
-                return Unauthorized("Sipariş vermek için önce giriş yapmalısınız.");
-            }
+                return Unauthorized("Ödeme yapmak için giriş yapmalısınız.");
 
-            var response = await _orderService.CreateAsync(dto, Guid.Parse(userIdClaim));
+            var response = await _paymentService.CreateAsync(dto, Guid.Parse(userIdClaim));
             return StatusCode(response.StatusCode, response);
         }
 
         [HttpPut("Update")]
-        public async Task<IActionResult> Update(OrderUpdateDto dto)
+        public async Task<IActionResult> Update(PaymentStatusUpdateDto dto)
         {
-            var response = await _orderService.UpdateAsync(dto);
+            var response = await _paymentService.UpdateStatusAsync(dto);
             return StatusCode(response.StatusCode, response);
         }
 
         [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var response = await _orderService.RemoveAsync(id);
+            var response = await _paymentService.RemoveAsync(id);
             return StatusCode(response.StatusCode, response);
         }
     }

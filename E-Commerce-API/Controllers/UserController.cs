@@ -2,7 +2,7 @@
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EShopCoreAPI.Controllers
+namespace E_Commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

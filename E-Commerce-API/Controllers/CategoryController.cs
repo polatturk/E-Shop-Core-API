@@ -3,7 +3,7 @@ using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace E_Shop_Core_API.Controllers
+namespace E_Commerce_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace EShopCoreAPI
+namespace E_Commerce_API
 {
     public class Program
     {
@@ -27,7 +27,7 @@ namespace EShopCoreAPI
 
             builder.Services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "EShop Core API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "E_Commerce_API", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
