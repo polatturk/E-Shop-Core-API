@@ -18,6 +18,5 @@ namespace Core.Mappings
 
         public static partial List<PaymentResponseDto> ToResponseDtoList(List<Payment> payments);
 
-        public static partial void UpdateStatusFromDto(PaymentStatusUpdateDto dto, Payment entity);
     }
 }

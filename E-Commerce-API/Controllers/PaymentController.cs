@@ -37,19 +37,5 @@ namespace E_Commerce_API.Controllers
             var response = await _paymentService.CreateAsync(dto, Guid.Parse(userIdClaim));
             return StatusCode(response.StatusCode, response);
         }
-
-        [HttpPut("Update")]
-        public async Task<IActionResult> Update(PaymentStatusUpdateDto dto)
-        {
-            var response = await _paymentService.UpdateStatusAsync(dto);
-            return StatusCode(response.StatusCode, response);
-        }
-
-        [HttpDelete("Delete/{id}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var response = await _paymentService.RemoveAsync(id);
-            return StatusCode(response.StatusCode, response);
-        }
     }
 }

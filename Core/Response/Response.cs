@@ -13,12 +13,13 @@ namespace Core.Response
         public bool IsSuccess { get; set; }
         public int StatusCode { get; set; }
         public List<string>? Errors { get; set; }
+        public string? Message { get; set; }
 
-        public static Response<T> Success(T data, int statusCode = 200)
-            => new() { Data = data, IsSuccess = true, StatusCode = statusCode };
+        public static Response<T> Success(T data, int statusCode = 200, string? message = null)
+            => new() { Data = data, IsSuccess = true, StatusCode = statusCode, Message = message };
 
-        public static Response<T> Success(int statusCode = 200)
-            => new() { IsSuccess = true, StatusCode = statusCode };
+        public static Response<T> Success(int statusCode = 200, string? message = null)
+            => new() { IsSuccess = true, StatusCode = statusCode, Message = message };
 
         public static Response<T> Fail(string error, int statusCode = 400)
             => new() { IsSuccess = false, Errors = new List<string> { error }, StatusCode = statusCode };

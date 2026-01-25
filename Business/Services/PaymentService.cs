@@ -32,23 +32,27 @@ public class PaymentService(IUnitOfWork _unitOfWork) : IPaymentService
 
     public async Task<Response<PaymentResponseDto>> CreateAsync(PaymentCreateDto dto, Guid userId)
     {
-        // 1. Ödeme yapılmak istenen siparişi bulma
         var order = await _unitOfWork.GetRepository<Order>()
-            .GetByIdAsync(dto.OrderId);
+            .GetSingleAsync(x => x.Id == dto.OrderId && x.UserId == userId);
 
-        // 2. Güvenlik ve Mantık Kontrolleri
         if (order == null)
-            return Response<PaymentResponseDto>.Fail("Ödeme yapılacak sipariş bulunamadı.", 404);
+        {
+            return Response<PaymentResponseDto>.Fail("Sipariş bulunamadı veya size ait değil.", 404);
+        }
 
-        if (order.UserId != userId)
-            return Response<PaymentResponseDto>.Fail("Size ait olmayan bir sipariş için ödeme yapamazsınız!", 403);
+        if (dto.Amount < order.TotalAmount)
+        {
+            return Response<PaymentResponseDto>.Fail($"Yetersiz ödeme. Gereken: {order.TotalAmount}", 400);
+        }
 
-        if (order.Status == OrderStatus.Shipped || order.Status == OrderStatus.Completed)
-            return Response<PaymentResponseDto>.Fail("Bu sipariş zaten kargolanmış veya teslim edilmiş.", 400);
+        //Yanlisikla tekrar odeme alinmamasi icin
+        if (order.Status != OrderStatus.Pending)
+        {
+            return Response<PaymentResponseDto>.Fail("Bu siparişin ödeme süreci zaten tamamlanmış veya iptal edilmiş.", 400);
+        }
 
         var entity = PaymentMapper.ToEntity(dto);
         entity.PaymentDate = DateTime.Now;
-
         entity.Status = PaymentStatus.Success;
 
         order.Status = OrderStatus.Processing;
@@ -56,37 +60,22 @@ public class PaymentService(IUnitOfWork _unitOfWork) : IPaymentService
         await _unitOfWork.GetRepository<Payment>().AddAsync(entity);
         _unitOfWork.GetRepository<Order>().Update(order);
 
+        await ClearCartAsync(userId);
+
         await _unitOfWork.SaveChangesAsync();
 
         var responseDto = PaymentMapper.ToResponseDto(entity);
-        return Response<PaymentResponseDto>.Success(responseDto, 201);
+        return Response<PaymentResponseDto>.Success(responseDto,201,"Ödemeniz başarıyla alındı. Siparişiniz hazırlanıyor!");
     }
 
-    public async Task<Response<bool>> UpdateStatusAsync(PaymentStatusUpdateDto dto)
+    private async Task ClearCartAsync(Guid userId)
     {
-        var existingPayment = await _unitOfWork.GetRepository<Payment>().GetByIdAsync(dto.Id);
+        var cart = await _unitOfWork.GetRepository<Cart>()
+            .GetSingleAsync(x => x.UserId == userId, include: q => q.Include(c => c.Items));
 
-        if (existingPayment == null)
-            return Response<bool>.Fail("Ödeme kaydı bulunamadı", 404);
-
-        PaymentMapper.UpdateStatusFromDto(dto, existingPayment);
-
-        _unitOfWork.GetRepository<Payment>().Update(existingPayment);
-        await _unitOfWork.SaveChangesAsync();
-
-        return Response<bool>.Success(true, 204);
-    }
-
-    public async Task<Response<bool>> RemoveAsync(Guid id)
-    {
-        var payment = await _unitOfWork.GetRepository<Payment>().GetByIdAsync(id);
-
-        if (payment == null)
-            return Response<bool>.Fail("Ödeme kaydı bulunamadı", 404);
-
-        _unitOfWork.GetRepository<Payment>().Delete(payment);
-        await _unitOfWork.SaveChangesAsync();
-
-        return Response<bool>.Success(true, 204);
+        if (cart != null && cart.Items.Any())
+        {
+            _unitOfWork.GetRepository<CartItem>().DeleteRange(cart.Items);
+        }
     }
 }

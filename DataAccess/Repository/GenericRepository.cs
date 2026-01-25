@@ -36,8 +36,6 @@ public class GenericRepository<TEntity>(ApiContext _context) : IGenericRepositor
         return await query.FirstOrDefaultAsync(expression);
     }
 
-    public IQueryable<TEntity> GetAll() => _dbset.AsNoTracking();
-
     public async Task<TEntity?> GetByIdAsync(Guid id) => await _dbset.FindAsync(id);
 
     public async Task AddAsync(TEntity entity) => await _dbset.AddAsync(entity);
@@ -45,4 +43,9 @@ public class GenericRepository<TEntity>(ApiContext _context) : IGenericRepositor
     public void Update(TEntity entity) => _dbset.Update(entity);
 
     public void Delete(TEntity entity) => _dbset.Remove(entity);
+
+    public void DeleteRange(IEnumerable<TEntity> entities)
+    {
+        _dbset.RemoveRange(entities);
+    }
 }
