@@ -11,10 +11,10 @@ namespace Core.Interfaces
 {
     public interface ICartItemService
     {
-        Task<Response<List<CartItemResponseDto>>> GetAllAsync();
-        Task<Response<CartItemResponseDto>> GetByIdAsync(Guid id);
-        Task<Response<CartItemResponseDto>> CreateAsync(AddToCartDto dto);
-        Task<Response<bool>> UpdateAsync(CartItemUpdateDto dto);
-        Task<Response<bool>> RemoveAsync(Guid id);
+        Task<Response<List<CartItemResponseDto>>> GetAllByUserIdAsync(Guid userId);
+        Task<Response<CartItemResponseDto>> GetByIdAsync(Guid id, Guid userId);
+        Task<Response<CartItemResponseDto>> CreateAsync(AddToCartDto dto, Guid userId);
+        Task<Response<bool>> UpdateAsync(CartItemUpdateDto dto, Guid userId);
+        Task<Response<bool>> RemoveAsync(Guid id, Guid userId);
     }
 }
