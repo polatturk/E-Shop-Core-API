@@ -13,6 +13,9 @@ public interface IGenericRepository<T> where T : class
         Expression<Func<T, bool>>? filter = null,
         Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
 
+    Task<T?> GetSingleAsync(Expression<Func<T, bool>> expression,
+                           Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
+
     Task AddAsync(T entity); 
     void Update(T entity);
     void Delete(T entity);

@@ -13,8 +13,8 @@ namespace Core.Interfaces
     {
         Task<Response<List<CartResponseDto>>> GetAllAsync();
 
-        Task<Response<CartResponseDto>> GetByIdAsync(Guid id);
+        Task<Response<CartResponseDto>> GetByIdAsync(Guid id, Guid userId);
 
-        Task<Response<bool>> RemoveAsync(Guid id);
+        Task<Response<bool>> RemoveAsync(Guid id, Guid userId);
     }
 }

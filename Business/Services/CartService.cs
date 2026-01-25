@@ -17,25 +17,32 @@ public class CartService(IUnitOfWork _unitOfWork) : ICartService
 
         var dtos = CartMapper.ToResponseDtoList(carts.ToList());
         return Response<List<CartResponseDto>>.Success(dtos, 200);
-    }   
+    }
 
-    public async Task<Response<CartResponseDto>> GetByIdAsync(Guid id)
+    public async Task<Response<CartResponseDto>> GetByIdAsync(Guid id, Guid userId)
     {
-        var cart = await _unitOfWork.GetRepository<Cart>().GetByIdAsync(id);
+        var cart = await _unitOfWork.GetRepository<Cart>()
+            .GetSingleAsync(
+                expression: x => x.Id == id && x.UserId == userId,
+                include: q => q.Include(c => c.Items).ThenInclude(i => i.Product)
+            );
 
         if (cart == null)
-            return Response<CartResponseDto>.Fail("Sepet bulunamadı", 404);
+        {
+            return Response<CartResponseDto>.Fail("Sepet bulunamadı veya bu sepete erişim yetkiniz yok.", 404);
+        }
 
         var dto = CartMapper.ToResponseDto(cart);
         return Response<CartResponseDto>.Success(dto, 200);
     }
 
-    public async Task<Response<bool>> RemoveAsync(Guid id)
+    public async Task<Response<bool>> RemoveAsync(Guid id, Guid userId)
     {
-        var cart = await _unitOfWork.GetRepository<Cart>().GetByIdAsync(id);
+        var cart = await _unitOfWork.GetRepository<Cart>()
+            .GetSingleAsync(x => x.Id == id && x.UserId == userId);
 
         if (cart == null)
-            return Response<bool>.Fail("Sepet bulunamadı", 404);
+            return Response<bool>.Fail("Sepet bulunamadı veya yetkiniz yok.", 404);
 
         _unitOfWork.GetRepository<Cart>().Delete(cart);
         await _unitOfWork.SaveChangesAsync();

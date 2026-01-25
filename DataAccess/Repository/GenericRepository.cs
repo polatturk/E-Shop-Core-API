@@ -25,6 +25,17 @@ public class GenericRepository<TEntity>(ApiContext _context) : IGenericRepositor
         return await query.AsNoTracking().ToListAsync();
     }
 
+    public async Task<TEntity?> GetSingleAsync(
+        Expression<Func<TEntity, bool>> expression,
+        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)
+    {
+        IQueryable<TEntity> query = _dbset;
+
+        if (include != null) query = include(query);
+
+        return await query.FirstOrDefaultAsync(expression);
+    }
+
     public IQueryable<TEntity> GetAll() => _dbset.AsNoTracking();
 
     public async Task<TEntity?> GetByIdAsync(Guid id) => await _dbset.FindAsync(id);
